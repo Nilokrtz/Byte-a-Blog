@@ -2,28 +2,36 @@ const moongose = require("mongoose");
 const userService = require("../services/user.service");
 
 const validId = (req, res, next) => {
-  const id = req.params.id;
+  try {
+    const id = req.params.id;
 
-  if (!moongose.Types.ObjectId.isValid(id)) {
-    return res.status(400).send({ message: "Invalid Id" });
+    if (!moongose.Types.ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid Id" });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
-
-  next();
 };
 
 const validUser = async (req, res, next) => {
-  const id = req.params.id;
+  try {
+    const id = req.params.id;
 
-  const user = await userService.findById(id);
+    const user = await userService.findById(id);
 
-  if (!user) {
-    return res.status(400).send({ message: "User not found" });
+    if (!user) {
+      return res.status(400).send({ message: "User not found" });
+    }
+
+    req.id = id;
+    req.user = user;
+
+    next();
+  } catch (error) {
+    res.status(500).send({ message: error.message });
   }
-
-  req.id = id;
-  req.user = user;
-
-  next();
 };
 
 module.exports = {
