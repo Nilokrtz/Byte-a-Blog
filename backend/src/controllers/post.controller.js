@@ -1,4 +1,4 @@
-import { createService, findAllService } from "../services/post.service.js";
+import { createService, findAllService, countPosts } from "../services/post.service.js";
 
 const createController = async (req, res) => {
   try {
@@ -24,12 +24,46 @@ const createController = async (req, res) => {
 
 const findAllController = async (req, res) => {
   try {
-    const posts = await findAllService();
+    let {limit, offset} = req.query;
+    limit = Number(limit);
+    offset = Number(offset);
+
+    if (!limit) limit = 5;
+    if (!offset) offset = 0;
+
+    const posts = await findAllService(limit, offset);
+    const total = await countPosts();
+    const currentUrl = req.baseUrl;
+
+    const next = offset + limit;
+    const nextUrl = next < total ? `${currentUrl}?limit=${limit}&offset=${next}` : null;
+
+    const previous = offset - limit < 0 ? null : offset - limit;
+    const previousUrl = previous !== null ? `${currentUrl}?limit=${limit}&offset=${previous}` : null;
+
     if (posts.length === 0) {
       return res.status(404).send({ message: "There are no posts" });
     }
 
-    res.send(posts);
+    res.send({
+      nextUrl,
+      previousUrl,
+      limit,
+      offset,
+      total,
+      
+      results: posts.map((postItem) => ({
+        id: postItem._id,
+        title: postItem.title,
+        content: postItem.content,
+        image: postItem.image,
+        likes: postItem.likes,
+        comments: postItem.comments,
+        name: postItem.user.name,
+        username: postItem.user.username,
+        userAvatar: postItem.user.avatar
+      }))
+    });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
