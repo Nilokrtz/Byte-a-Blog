@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService} from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService} from "../services/post.service.js";
 
 export const createController = async (req, res) => {
   try {
@@ -170,6 +170,33 @@ export const byUserController = async (req, res) => {
         userAvatar: post.user.avatar
       }))
     });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const updatePostController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, image } = req.body;
+
+    if (!title && !content && !image) {
+      return res.status(400).send({ message: "Submit at least one field to update the post" });
+    }
+
+    const post = await findByIdService(id);
+
+    if(post.user._id.toString() !== req.userId){
+      return res.status(400).send({ message: "You don't have permission to update this post" });
+    }
+
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+
+    await updatePostService(id, title, content, image);
+
+    return res.send({ message: "Post updated successfully" });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
