@@ -12,5 +12,6 @@ export const findByIdService = (id) => Post.findById(id).populate("user");
 
 export const searchByTitleService = (title) => Post.find({
   title: { $regex: `${title || ""}`, $options: "i" }
- }).sort({ _id: -1 })
- .populate("user");
+ }).sort({ _id: -1 }).populate("user");
+
+ export const byUserService = (id) => Post.find({ user: id }).sort({ _id: -1 }).populate("user");

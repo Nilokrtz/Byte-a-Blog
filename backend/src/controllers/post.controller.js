@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService} from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService} from "../services/post.service.js";
 
 export const createController = async (req, res) => {
   try {
@@ -132,6 +132,30 @@ export const searchByTitleController = async (req, res) => {
     if (posts.length === 0) {
       return res.status(400).send({ message: "No posts found with this title" });
     }
+
+    return res.send({
+      results: posts.map((post) => ({
+        id: post._id,
+        title: post.title,
+        content: post.content,
+        image: post.image,
+        likes: post.likes,
+        comments: post.comments,
+        name: post.user.name,
+        username: post.user.username,
+        userAvatar: post.user.avatar
+      }))
+    });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const byUserController = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const posts = await byUserService(userId);
 
     return res.send({
       results: posts.map((post) => ({
