@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService } from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService} from "../services/post.service.js";
 
 const createController = async (req, res) => {
   try {
@@ -98,4 +98,29 @@ const topPostController = async (req, res) => {
 
 };
 
-export { createController, findAllController, topPostController};
+const findByIdController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const post = await findByIdService(id);
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+
+    res.send({
+      id: post._id,
+      title: post.title,
+      content: post.content,
+      image: post.image,
+      likes: post.likes,
+      comments: post.comments,
+      name: post.user.name,
+      username: post.user.username,
+      userAvatar: post.user.avatar
+    });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+}
+
+export { createController, findAllController, topPostController, findByIdController};
