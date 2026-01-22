@@ -21,3 +21,5 @@ export const updatePostService = (id, title, content, image) => Post.findOneAndU
   { title, content, image },
   { rawResult: true }
 );
+
+export const deletePostService = (id) => Post.findOneAndDelete({ _id: id });

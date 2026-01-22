@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService} from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService, deletePostService} from "../services/post.service.js";
 
 export const createController = async (req, res) => {
   try {
@@ -197,6 +197,23 @@ export const updatePostController = async (req, res) => {
     await updatePostService(id, title, content, image);
 
     return res.send({ message: "Post updated successfully" });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const deletePostController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const post = await findByIdService(id);
+
+    if(post.user._id.toString() !== req.userId){
+      return res.status(400).send({ message: "You didn't delete this post" });
+    }
+    await deletePostService(id);
+
+    return res.send({ message: "Post deleted successfully" });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
