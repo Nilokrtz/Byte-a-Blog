@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService, deletePostService} from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService, deletePostService, likeNewsService, deleteLikeNewsService} from "../services/post.service.js";
 
 export const createController = async (req, res) => {
   try {
@@ -214,6 +214,26 @@ export const deletePostController = async (req, res) => {
     await deletePostService(id);
 
     return res.send({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const likeNewsController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    const newsLiked = await likeNewsService(id, userId);
+
+    if(!newsLiked){
+      await deleteLikeNewsService(id, userId);
+      return  res.status(200).send({ message: "Like removed successfully" });
+    }
+
+    console.log(newsLiked);
+
+    res.status(200).send({ message: "News liked successfully" });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
