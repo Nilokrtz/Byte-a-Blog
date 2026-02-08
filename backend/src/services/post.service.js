@@ -33,3 +33,20 @@ export const deleteLikeNewsService = async (postId, userId) => Post.findOneAndUp
   { _id: postId },
   { $pull: { likes: { userId } } }
 );
+
+export const addCommentService = async (postId, comment, userId) => {
+ const idComment = Math.floor(Date.now() * Math.random()).toString(36);
+
+ return Post.findOneAndUpdate(
+  { _id: postId },
+  { $push: { comments: { idComment, comment, userId, 
+    createdAt: new Date() }, }, }
+  );
+};
+
+export const deleteCommentService = async (postId, idComment, userId) => 
+  Post.findOneAndUpdate(
+    { _id: postId },
+    { $pull: { comments: { idComment, userId } } }
+  );
+

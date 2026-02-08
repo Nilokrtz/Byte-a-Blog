@@ -1,4 +1,4 @@
-import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService, deletePostService, likeNewsService, deleteLikeNewsService} from "../services/post.service.js";
+import { createService, findAllService, countPosts, topPostService, findByIdService, searchByTitleService, byUserService, updatePostService, deletePostService, likeNewsService, deleteLikeNewsService, addCommentService, deleteCommentService} from "../services/post.service.js";
 
 export const createController = async (req, res) => {
   try {
@@ -234,6 +234,45 @@ export const likeNewsController = async (req, res) => {
     console.log(newsLiked);
 
     res.status(200).send({ message: "News liked successfully" });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const addCommentController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    const { comment } = req.body;
+
+    if(!comment){
+      return res.status(400).send({ message: "Submit the comment to add it to the post" });
+    }
+    
+    await addCommentService(id, comment, userId);
+
+    res.send({ message: "Comment added successfully" });
+
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+export const deleteCommentController = async (req, res) => {
+   try {
+    const { idPost, idComment } = req.params;
+    const userId = req.userId;
+    
+    const deletedComment = await deleteCommentService(idPost, idComment, userId);
+
+    const commentFinder = deletedComment.comments.find((comment) => comment.idComment === idComment);
+
+    if(commentFinder.userId !== userId){
+      return res.status(400).send({ message: "You don't have permission to delete this comment" });
+    }
+
+    res.send({ message: "Comment deleted successfully" });
+
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
